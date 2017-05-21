@@ -49,7 +49,7 @@ class Database:
         # create a set for each table's columns
         self.table_columns = {}
         for table, columns in self.SCHEMA:
-            self.table_columns[table] = set(map(lambda c: c[0], columns))
+            self.table_columns[table] = set([c[0] for c in columns])
 
     def get_record_by_id(self, table, record_id):
         return self.get_record(table, where='id = ?', parameters=(record_id, ))
@@ -114,13 +114,13 @@ class Database:
         for record in new_records:
             self._fill_columns(table, record)
 
-        keys = new_records[0].keys()
+        keys = list(new_records[0].keys())
 
         # the column part of the INSERT query
         columns = ', '.join(keys)
 
         # the value part of the INSERT query
-        placeholders = ', '.join(map(lambda k: ':{0}'.format(k), keys))
+        placeholders = ', '.join([':{0}'.format(k) for k in keys])
 
         # generate the full UPDATE query
         query = 'INSERT INTO {0} ({1}) VALUES ({2})'.format(table, columns, placeholders)
@@ -147,7 +147,7 @@ class Database:
         value_columns.remove('id')
 
         # the value part of the UPDATE query
-        placeholders = ', '.join(map(lambda k: '{0} = :{0}'.format(k), value_columns))
+        placeholders = ', '.join(['{0} = :{0}'.format(k) for k in value_columns])
 
         # generate the full UPDATE query
         query = 'UPDATE {0} SET {1} WHERE id = :id'.format(table, placeholders)
@@ -182,7 +182,7 @@ class Database:
         with closing(self.conn.cursor()) as c:
             for table, columns in self.SCHEMA:
                 # generate the column declarations
-                columns = ', '.join(map(lambda c: '{0} {1}'.format(*c), columns))
+                columns = ', '.join(['{0} {1}'.format(*c) for c in columns])
 
                 # generate query
                 query = 'CREATE TABLE IF NOT EXISTS {0} ({1})'.format(table, columns)
